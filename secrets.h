@@ -1,5 +1,5 @@
-#ifndef _SECRETS_H    
-#define _SECRETS_H    
+#ifndef _SECRETS_H
+#define _SECRETS_H
 
 #include <string.h>
 // Wifi Credentials
@@ -14,4 +14,4 @@ const char* mqtt_port = "1883";
 
 // Device Id
 const char* device_id = "001";
-#endif 
+#endif
