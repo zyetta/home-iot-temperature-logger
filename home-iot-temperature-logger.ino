@@ -7,11 +7,18 @@
 #include "secrets.h"
 #include "wifi_controller.h"
 
+#include <Adafruit_Sensor.h>
+#include <DHT.h>
+
+#define DHTPIN 13
+#define DHTTYPE DHT11
+
 void reconnect();
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-
+DHT dht(DHTPIN, DHTTYPE);
+float temp = 0;
 uint64_t timeNow = millis();
 const String mqtt_topic = "temperature/" + String(device_id);
 
@@ -20,6 +27,7 @@ void setup() {
     initWiFi();
     client.setServer(mqtt_broker, 1883);
     client.setCallback(mqttCallback);
+    dht.begin();
 }
 
 void loop() {
@@ -29,10 +37,11 @@ void loop() {
     client.loop();
     if (millis() - timeNow > 60000) {
         timeNow = millis();
-        Serial.println("Sampling Data");
-
-        client.publish(mqtt_topic.c_str(),
-                       std::to_string(random(10, 30)).c_str());
+        temp = dht.readTemperature();
+        while(isnan(temp)) {
+            temp = dht.readTemperature();
+        }
+        client.publish(mqtt_topic.c_str(), std::to_string(temp).c_str());
     }
 }
 
