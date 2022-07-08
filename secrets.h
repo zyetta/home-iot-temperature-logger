@@ -3,7 +3,7 @@
 
 #include <string.h>
 // Wifi Credentials
-const char* ssid = "JdKOffice";
+const char* ssid = "Flat2";
 const char* password = "jdknetwork21";
 
 // MQTT Credentials

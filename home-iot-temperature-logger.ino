@@ -17,10 +17,16 @@ void reconnect();
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+const String mqtt_topic_temp = "temperature/" + String(device_id);
+const String mqtt_topic_hum = "humidity/" + String(device_id);
+
 DHT dht(DHTPIN, DHTTYPE);
+
 float temp = 0;
+float hum = 0;
+
 uint64_t timeNow = millis();
-const String mqtt_topic = "temperature/" + String(device_id);
+uint64_t uploadPeriod = 10 * 60 * 1000;
 
 void setup() {
     Serial.begin(115200);
@@ -35,13 +41,18 @@ void loop() {
         reconnect();
     }
     client.loop();
-    if (millis() - timeNow > 60000) {
+    if (millis() - timeNow > uploadPeriod) {
         timeNow = millis();
+
         temp = dht.readTemperature();
-        while(isnan(temp)) {
+        hum = dht.readHumidity();
+
+        while(isnan(temp) || isnan(hum)) {
             temp = dht.readTemperature();
+            hum = dht.readHumidity();
         }
-        client.publish(mqtt_topic.c_str(), std::to_string(temp).c_str());
+        client.publish(mqtt_topic_temp.c_str(), std::to_string(temp).c_str());
+        client.publish(mqtt_topic_hum.c_str(), std::to_string(hum).c_str());
     }
 }
 
